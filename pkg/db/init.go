@@ -1,7 +1,17 @@
 package db
 
-import "fmt"
+import (
+	"context"
+	"log"
+	"os"
 
-func main() {
-	fmt.Println("vim-go")
+	"github.com/jackc/pgx/v4/pgxpool"
+)
+
+func InitDB() *pgxpool.Pool {
+	dbpool, err := pgxpool.Connect(context.Background(), os.Getenv("DATABASE_URL"))
+	if err != nil {
+		log.Println(err)
+	}
+	return dbpool
 }
