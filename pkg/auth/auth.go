@@ -2,6 +2,7 @@ package auth
 
 import (
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"net/http"
 
@@ -45,5 +46,34 @@ func RegisterHandler(dbpool *pgxpool.Pool) http.HandlerFunc {
 func LoginHandler(dbpool *pgxpool.Pool) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
+		var u Users
+
+		err := json.NewDecoder(r.Body).Decode(&u)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		var hashedPassword string
+
+		err = dbpool.QueryRow(context.Background(), "select password from users where email like $1", u.Email).Scan(&hashedPassword)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		// w.Write([]byte(hashedPassword))
+		err = bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(u.Password))
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusUnauthorized)
+			return
+		}
+		// Return encrypted username
+		w.Write([]byte(encrypt(u.Email)))
+
 	}
+}
+
+func encrypt(s string) string {
+	encoded := base64.StdEncoding.EncodeToString([]byte(s))
+	return encoded
 }
