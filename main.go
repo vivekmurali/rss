@@ -25,10 +25,8 @@ func main() {
 
 	r.Post("/register", auth.RegisterHandler(pool))
 	r.Post("/login", auth.LoginHandler(pool))
-	/*
-		get
-	*/
 	r.Post("/add", routes.AddLink(pool))
 	r.Delete("/delete", routes.DeleteLink(pool))
+	r.Get("/get", routes.GetLinks(pool))
 	http.ListenAndServe(":3000", r)
 }
