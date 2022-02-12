@@ -1,6 +1,6 @@
 # RSS FEED
 
-* [ ] Auth
+* [x] Auth
 * [ ] Modify RSS
 * [ ] SMTP to send mail
 * [ ] HTML Template
@@ -15,3 +15,7 @@
 | ID     | USER ID     | Link    |
 |--------|-------------|---------|
 | serial | foreign key | varchar |
+
+
+* [ ] Remove Duplicate links
+* [ ] Let user choose frequency

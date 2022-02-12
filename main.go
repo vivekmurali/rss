@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"rss/pkg/auth"
 	"rss/pkg/db"
+	"rss/pkg/routes"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -24,5 +25,10 @@ func main() {
 
 	r.Post("/register", auth.RegisterHandler(pool))
 	r.Post("/login", auth.LoginHandler(pool))
+	/*
+		get
+	*/
+	r.Post("/add", routes.AddLink(pool))
+	r.Delete("/delete", routes.DeleteLink(pool))
 	http.ListenAndServe(":3000", r)
 }
