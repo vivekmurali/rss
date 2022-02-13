@@ -5,6 +5,7 @@ import (
 	"rss/pkg/auth"
 	"rss/pkg/db"
 	"rss/pkg/routes"
+	"rss/pkg/task"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -12,17 +13,23 @@ import (
 )
 
 func main() {
+
+	// Initialization
 	godotenv.Load()
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
 
+	// Database implementation
 	pool := db.InitDB()
 	defer pool.Close()
 
+	// Job Scheduler
+	go task.RunTask(pool)
+
+	// Routes
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("Hello World!"))
 	})
-
 	r.Post("/register", auth.RegisterHandler(pool))
 	r.Post("/login", auth.LoginHandler(pool))
 	r.Post("/add", routes.AddLink(pool))
