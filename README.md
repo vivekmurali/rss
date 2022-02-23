@@ -1,9 +1,9 @@
 # RSS FEED
 
 * [x] Auth
-* [ ] Modify RSS
+* [x] Modify RSS
 * [ ] SMTP to send mail
-* [ ] HTML Template
+* [x] Email Template
 
 
 
@@ -19,3 +19,5 @@
 
 * [ ] Remove Duplicate links
 * [ ] Let user choose frequency
+* [ ] Find XML file automatically
+* [ ] HTML email
