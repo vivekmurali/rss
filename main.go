@@ -2,39 +2,45 @@ package main
 
 import (
 	"net/http"
-	"rss/pkg/auth"
-	"rss/pkg/db"
-	"rss/pkg/routes"
-	"rss/pkg/task"
+	"os"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/joho/godotenv"
+	"github.com/mailgun/mailgun-go/v4"
 )
+
+type server struct {
+	db            *pgxpool.Pool
+	mg            *mailgun.MailgunImpl
+	privateAPIKey string
+}
 
 func main() {
 	godotenv.Load()
 
 	// Initialization
+	s := &server{mg: mailgun.NewMailgun("vivekmurali.in", os.Getenv("MG_API_KEY"))}
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
 
 	// Database implementation
-	pool := db.InitDB()
-	defer pool.Close()
+	s.db = initDB()
+	defer s.db.Close()
 
 	// Job Scheduler
-	go task.RunTask(pool)
+	go s.runTask()
 
 	// Routes
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("HELLO WORLD"))
 	})
-	r.Post("/register", auth.RegisterHandler(pool))
-	r.Post("/login", auth.LoginHandler(pool))
-	r.Post("/add", routes.AddLink(pool))
-	r.Delete("/delete", routes.DeleteLink(pool))
-	r.Get("/get", routes.GetLinks(pool))
+	r.Post("/register", s.register)
+	r.Post("/login", s.login)
+	r.Post("/add", s.addLink)
+	r.Delete("/delete", s.deleteLink)
+	r.Get("/get", s.getLinks)
 
 	http.ListenAndServe(":3000", r)
 }

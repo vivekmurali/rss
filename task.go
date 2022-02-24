@@ -1,4 +1,4 @@
-package task
+package main
 
 import (
 	"context"
@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/go-co-op/gocron"
-	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/mmcdole/gofeed"
 )
 
@@ -18,30 +17,30 @@ type ItemData struct {
 }
 
 // Overlay to run from main function through passing the database
-func RunTask(dbpool *pgxpool.Pool) {
+func (s *server) runTask() {
 	var task = func() {
-		findUsers(dbpool)
+		s.findUsers()
 	}
 
-	s := gocron.NewScheduler(time.UTC)
+	sc := gocron.NewScheduler(time.UTC)
 
 	// Only for testing purposes
 	// currentTime := time.Now().UTC()
 	// currentTime = currentTime.Add(time.Second * 1)
 	// timeString := currentTime.Format("15:04:05")
-	// s.Every(1).Day().At(timeString).Do(task)
+	// sc.Every(1).Day().At(timeString).Do(task)
 
-	// Change time
-	s.Every(1).Day().At("15:00:00").Do(task)
+	// Real statement
+	sc.Every(1).Day().At("15:00:00").Do(task)
 
-	s.StartAsync()
+	sc.StartAsync()
 }
 
 // Function to find users
 
-func findUsers(dbpool *pgxpool.Pool) {
+func (s *server) findUsers() {
 	fp := gofeed.NewParser()
-	rows, err := dbpool.Query(context.Background(), "select id, email from users")
+	rows, err := s.db.Query(context.Background(), "select id, email from users")
 	if err != nil {
 		fmt.Println("NOT WORKING IDK WHY", err.Error())
 	}
@@ -58,16 +57,16 @@ func findUsers(dbpool *pgxpool.Pool) {
 			fmt.Println("ERROR WITH ", rows.Err().Error())
 		}
 
-		singleUser(fp, id, email, dbpool)
+		s.singleUser(fp, id, email)
 	}
 
 }
 
 // Function to run a single user's posts
 
-func singleUser(fp *gofeed.Parser, id int64, email string, dbpool *pgxpool.Pool) {
+func (s *server) singleUser(fp *gofeed.Parser, id int64, email string) {
 
-	rows, err := dbpool.Query(context.Background(), "select link from links where user_id = $1", id)
+	rows, err := s.db.Query(context.Background(), "select link from links where user_id = $1", id)
 	if err != nil {
 		fmt.Println("Something wrong with rows", err.Error())
 	}
@@ -96,7 +95,7 @@ func singleUser(fp *gofeed.Parser, id int64, email string, dbpool *pgxpool.Pool)
 	// fmt.Println(emailString)
 
 	// Send this data as an email
-	sendEmail(email, emailString)
+	s.sendEmail(email, emailString)
 }
 
 // Find the items that are published in the last day
