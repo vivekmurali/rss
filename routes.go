@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"encoding/base64"
 	"encoding/json"
 	"net/http"
 
@@ -35,6 +34,12 @@ type LinkData struct {
 
 // Add a link
 func (s *server) addLink(w http.ResponseWriter, r *http.Request) {
+	session, _ := s.store.Get(r, "cookie-name")
+	if auth, ok := session.Values["authenticated"].(bool); !ok || !auth {
+		http.Error(w, "Forbidden", http.StatusForbidden)
+		return
+	}
+
 	var l Link
 	err := json.NewDecoder(r.Body).Decode(&l)
 	if err != nil {
@@ -44,7 +49,7 @@ func (s *server) addLink(w http.ResponseWriter, r *http.Request) {
 
 	var user_id int64
 
-	err = s.db.QueryRow(context.Background(), "select id from users where email like $1", l.Email).Scan(&user_id)
+	err = s.db.QueryRow(context.Background(), "select id from users where email like $1", session.Values["email"]).Scan(&user_id)
 
 	tag, err := s.db.Exec(context.Background(), "insert into links (user_id, link)values($1, $2)", user_id, l.Link)
 	if err != nil {
@@ -61,6 +66,11 @@ func (s *server) addLink(w http.ResponseWriter, r *http.Request) {
 
 // Delete link
 func (s *server) deleteLink(w http.ResponseWriter, r *http.Request) {
+	session, _ := s.store.Get(r, "cookie-name")
+	if auth, ok := session.Values["authenticated"].(bool); !ok || !auth {
+		http.Error(w, "Forbidden", http.StatusForbidden)
+		return
+	}
 
 	var l LinkID
 	err := json.NewDecoder(r.Body).Decode(&l)
@@ -71,7 +81,7 @@ func (s *server) deleteLink(w http.ResponseWriter, r *http.Request) {
 
 	var user_id int64
 
-	err = s.db.QueryRow(context.Background(), "select id from users where email like $1", l.Email).Scan(&user_id)
+	err = s.db.QueryRow(context.Background(), "select id from users where email like $1", session.Values["email"]).Scan(&user_id)
 
 	tag, err := s.db.Exec(context.Background(), "delete from links where user_id = $1 and id = $2", user_id, l.LinkID)
 	if err != nil {
@@ -89,16 +99,21 @@ func (s *server) deleteLink(w http.ResponseWriter, r *http.Request) {
 // Get all links of a particular user
 func (s *server) getLinks(w http.ResponseWriter, r *http.Request) {
 
-	var u Users
-	err := json.NewDecoder(r.Body).Decode(&u)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+	session, _ := s.store.Get(r, "cookie-name")
+	if auth, ok := session.Values["authenticated"].(bool); !ok || !auth {
+		http.Error(w, "Forbidden", http.StatusForbidden)
 		return
 	}
+	// var u Users
+	// err := json.NewDecoder(r.Body).Decode(&u)
+	// if err != nil {
+	// 	http.Error(w, err.Error(), http.StatusBadRequest)
+	// 	return
+	// }
 
 	var user_id int64
 
-	err = s.db.QueryRow(context.Background(), "select id from users where email like $1", u.Email).Scan(&user_id)
+	err := s.db.QueryRow(context.Background(), "select id from users where email like $1", session.Values["email"]).Scan(&user_id)
 	if err != nil {
 		// fmt.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -166,6 +181,8 @@ func (s *server) register(w http.ResponseWriter, r *http.Request) {
 // Login
 func (s *server) login(w http.ResponseWriter, r *http.Request) {
 
+	session, _ := s.store.Get(r, "cookie-name")
+
 	var u UsersData
 
 	err := json.NewDecoder(r.Body).Decode(&u)
@@ -188,11 +205,15 @@ func (s *server) login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// Return encrypted username
-	w.Write([]byte(encrypt(u.Email)))
+	session.Values["authenticated"] = true
+	session.Values["email"] = u.Email
+	session.Save(r, w)
+	w.Write([]byte("Login successful"))
 }
 
-// Convert to base64
-func encrypt(s string) string {
-	encoded := base64.StdEncoding.EncodeToString([]byte(s))
-	return encoded
+func (s *server) logout(w http.ResponseWriter, r *http.Request) {
+	session, _ := s.store.Get(r, "cookie-name")
+	session.Values["authenticated"] = false
+	session.Save(r, w)
+	w.Write([]byte("Logged out"))
 }

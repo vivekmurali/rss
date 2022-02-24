@@ -2,7 +2,7 @@
 
 * [x] Auth
 * [x] Modify RSS
-* [ ] SMTP to send mail
+* [x] SMTP to send mail
 * [x] Email Template
 
 
