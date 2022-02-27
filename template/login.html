@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta
+			name="viewport"
+			content="width=device-width, initial-scale=1.0"
+		/>
+		<title>RSS</title>
+	</head>
+	<body>
+		<form action="" method="" id="form">
+			<input
+				type="text"
+				name="email"
+				id="email_id"
+				placeholder="email"
+			/>
+			<input
+				type="text"
+				name="password"
+				id="password_id"
+				placeholder="password"
+			/>
+			<input type="button" value="submit" id="submit-btn" />
+		</form>
+	</body>
+</html>
+
+<script>
+	form = document.getElementById("form");
+	btn = document.getElementById("submit-btn");
+
+	form.addEventListener("submit", (e) => {
+		e.preventDefault();
+		e.stopPropagation();
+	});
+	btn.addEventListener("click", () => {
+		const data = {
+			email: document.getElementById("email_id").value,
+			password: document.getElementById("password_id").value,
+		};
+		//console.log(data);
+		//console.log(document.getElementById("email_id").value);
+		fetch("/login", {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify(data),
+		})
+			.then((response) => response.text())
+			.then((text) => {
+				//console.log(text);
+				location.replace('/dashboard');
+			})
+			.catch((err) => {
+				console.error(error);
+			});
+	});
+</script>

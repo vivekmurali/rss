@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta
+			name="viewport"
+			content="width=device-width, initial-scale=1.0"
+		/>
+		<title>RSS</title>
+	</head>
+	<body>
+		<button id="logout-btn">Logout</button>
+		<form>
+			<input type="text" name="link" id="link" />
+			<input type="button" value="submit" id="submit-btn" />
+		</form>
+		<ul>
+			{{range .}}
+			<li>
+				{{.Link}}
+				<button class="delete-btn" data-id="{{.Id}}">
+					delete
+				</button>
+			</li>
+			{{end}}
+		</ul>
+	</body>
+</html>
+
+<script>
+	document.getElementById("logout-btn").addEventListener("click", () => {
+		fetch("/logout", { method: "POST" }).then((res) => {
+			if (res.ok) {
+				location.assign("/login");
+			}
+		});
+	});
+	document.getElementById("submit-btn").addEventListener("click", () => {
+		let formData = new FormData();
+		formData.append("link", document.getElementById("link").value);
+		fetch("/add", {
+			method: "POST",
+			body: formData,
+		}).then((res) => {
+			if (res.ok) {
+				location.reload();
+			}
+		});
+	});
+
+	document.querySelectorAll(".delete-btn").forEach((el) => {
+		el.addEventListener("click", () => {
+			//console.log(el.dataset.id);
+			fetch("/delete/" + el.dataset.id, {
+				method: "DELETE",
+			}).then((res) => {
+				if (res.ok) {
+					location.reload();
+				}
+			});
+		});
+	});
+</script>

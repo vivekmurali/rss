@@ -1,6 +1,7 @@
 package main
 
 import (
+	"html/template"
 	"net/http"
 	"os"
 
@@ -38,12 +39,23 @@ func main() {
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("HELLO WORLD"))
 	})
+	r.Get("/register", func(w http.ResponseWriter, r *http.Request) {
+		tmpl, _ := template.ParseFiles("template/register.html")
+		tmpl.Execute(w, nil)
+	})
 	r.Post("/register", s.register)
+	r.Get("/login", func(w http.ResponseWriter, r *http.Request) {
+		tmpl, _ := template.ParseFiles("template/login.html")
+		tmpl.Execute(w, nil)
+	})
 	r.Post("/login", s.login)
 	r.Post("/logout", s.logout)
+	r.Get("/add", func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, "/dashboard", http.StatusTemporaryRedirect)
+	})
 	r.Post("/add", s.addLink)
-	r.Delete("/delete", s.deleteLink)
-	r.Get("/get", s.getLinks)
+	r.Delete("/delete/{id}", s.deleteLink)
+	r.Get("/dashboard", s.getLinks)
 
 	http.ListenAndServe(":3000", r)
 }

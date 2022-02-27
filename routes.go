@@ -3,8 +3,11 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"fmt"
+	"html/template"
 	"net/http"
 
+	"github.com/go-chi/chi/v5"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -39,19 +42,21 @@ func (s *server) addLink(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Forbidden", http.StatusForbidden)
 		return
 	}
+	link := r.FormValue("link")
+	fmt.Println(link)
 
-	var l Link
-	err := json.NewDecoder(r.Body).Decode(&l)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
+	// var l Link
+	// err := json.NewDecoder(r.Body).Decode(&l)
+	// if err != nil {
+	// 	http.Error(w, err.Error(), http.StatusBadRequest)
+	// 	return
+	// }
 
 	var user_id int64
 
-	err = s.db.QueryRow(context.Background(), "select id from users where email like $1", session.Values["email"]).Scan(&user_id)
+	err := s.db.QueryRow(context.Background(), "select id from users where email like $1", session.Values["email"]).Scan(&user_id)
 
-	tag, err := s.db.Exec(context.Background(), "insert into links (user_id, link)values($1, $2)", user_id, l.Link)
+	tag, err := s.db.Exec(context.Background(), "insert into links (user_id, link)values($1, $2)", user_id, link)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -60,8 +65,8 @@ func (s *server) addLink(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Couldn't insert", http.StatusBadRequest)
 	}
 
-	w.Write([]byte("Successfully written"))
-
+	// w.Write([]byte("Successfully written"))
+	w.WriteHeader(http.StatusOK)
 }
 
 // Delete link
@@ -72,18 +77,20 @@ func (s *server) deleteLink(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var l LinkID
-	err := json.NewDecoder(r.Body).Decode(&l)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
+	// var l LinkID
+	// err := json.NewDecoder(r.Body).Decode(&l)
+	// if err != nil {
+	// 	http.Error(w, err.Error(), http.StatusBadRequest)
+	// 	return
+	// }
+
+	linkID := chi.URLParam(r, "id")
 
 	var user_id int64
 
-	err = s.db.QueryRow(context.Background(), "select id from users where email like $1", session.Values["email"]).Scan(&user_id)
+	err := s.db.QueryRow(context.Background(), "select id from users where email like $1", session.Values["email"]).Scan(&user_id)
 
-	tag, err := s.db.Exec(context.Background(), "delete from links where user_id = $1 and id = $2", user_id, l.LinkID)
+	tag, err := s.db.Exec(context.Background(), "delete from links where user_id = $1 and id = $2", user_id, linkID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -93,15 +100,16 @@ func (s *server) deleteLink(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Write([]byte("Successfully deleted"))
-
+	// http.Redirect(w, r, "/dashboard", http.StatusTemporaryRedirect)
 }
 
-// Get all links of a particular user
+// Get all links of a particular user DASHBOARD
 func (s *server) getLinks(w http.ResponseWriter, r *http.Request) {
 
 	session, _ := s.store.Get(r, "cookie-name")
 	if auth, ok := session.Values["authenticated"].(bool); !ok || !auth {
-		http.Error(w, "Forbidden", http.StatusForbidden)
+		// http.Error(w, "Forbidden", http.StatusForbidden)
+		http.Redirect(w, r, "/login", http.StatusTemporaryRedirect)
 		return
 	}
 	// var u Users
@@ -143,18 +151,21 @@ func (s *server) getLinks(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, rows.Err().Error(), http.StatusBadRequest)
 	}
 
-	jsonData, err := json.Marshal(linksData)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-	}
+	// jsonData, err := json.Marshal(linksData)
+	// if err != nil {
+	// 	http.Error(w, err.Error(), http.StatusBadRequest)
+	// }
 
-	w.Write(jsonData)
+	// w.Write(jsonData)
+	tmpl, _ := template.ParseFiles("template/dashboard.html")
+	tmpl.Execute(w, linksData)
 }
 
 // Register account
 func (s *server) register(w http.ResponseWriter, r *http.Request) {
 
 	var u UsersData
+	fmt.Println("USER: ", u.Email)
 	err := json.NewDecoder(r.Body).Decode(&u)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
