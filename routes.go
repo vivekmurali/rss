@@ -7,6 +7,7 @@ import (
 	"html/template"
 	"net/http"
 
+	"github.com/PuerkitoBio/goquery"
 	"github.com/go-chi/chi/v5"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -31,27 +32,80 @@ func (s *server) addLink(w http.ResponseWriter, r *http.Request) {
 	link := r.FormValue("link")
 	// fmt.Println(link)
 
+	// _, err := url.Parse(link)
+	// if err != nil {
+	// 	http.Error(w, "not a valid link", http.StatusBadRequest)
+	// 	return
+	// }
+	// host := u.Host
+
+	// tries := []string{"feed", "index.xml", "rss"}
+
 	_, err := s.parser.ParseURL(link)
 	if err != nil {
-		http.Error(w, "not a valid link", http.StatusBadRequest)
-		return
+		resp, err := http.Get(link)
+		if err != nil {
+			http.Error(w, "not a valid link", http.StatusBadRequest)
+			return
+		}
+		defer resp.Body.Close()
+
+		doc, err := goquery.NewDocumentFromReader(resp.Body)
+		if err != nil {
+			fmt.Println(err.Error())
+		}
+
+		doc.Find("link").Each(func(i int, s *goquery.Selection) {
+			t, ok := s.Attr("type")
+			if !ok {
+				return
+			}
+			if t == "application/rss+xml" || t == "application/atom+xml" {
+				// fmt.Println(s.Attr("href"))
+				link, _ = s.Attr("href")
+			}
+		})
+		// }
+
+		// resp, err := http.Get(link)
+		// if err != nil {
+		// 	http.Error(w, "not a valid link", http.StatusBadRequest)
+		// 	return
+		// }
+		// defer resp.Body.Close()
+
+		// doc, err := goquery.NewDocumentFromReader(resp.Body)
+		// if err != nil {
+		// 	fmt.Println(err.Error())
+		// }
+
+		// doc.Find("link").Each(func(i int, s *goquery.Selection) {
+		// 	t, ok := s.Attr("type")
+		// 	if !ok {
+		// 		return
+		// 	}
+		// 	if t == "application/rss+xml" || t == "application/atom+xml" {
+		// 		// fmt.Println(s.Attr("href"))
+		// 		link, _ = s.Attr("href")
+		// 	}
+		// })
+
+		var user_id int64
+
+		err = s.db.QueryRow(context.Background(), "select id from users where email like $1", session.Values["email"]).Scan(&user_id)
+
+		tag, err := s.db.Exec(context.Background(), "insert into links (user_id, link)values($1, $2)", user_id, link)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		if !tag.Insert() {
+			http.Error(w, "Couldn't insert", http.StatusBadRequest)
+		}
+
+		// w.Write([]byte("Successfully written"))
+		w.WriteHeader(http.StatusOK)
 	}
-
-	var user_id int64
-
-	err = s.db.QueryRow(context.Background(), "select id from users where email like $1", session.Values["email"]).Scan(&user_id)
-
-	tag, err := s.db.Exec(context.Background(), "insert into links (user_id, link)values($1, $2)", user_id, link)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-	if !tag.Insert() {
-		http.Error(w, "Couldn't insert", http.StatusBadRequest)
-	}
-
-	// w.Write([]byte("Successfully written"))
-	w.WriteHeader(http.StatusOK)
 }
 
 // Delete link

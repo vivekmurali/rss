@@ -4,6 +4,8 @@
 * [x] Email validation
 * [x] RSS validation
 * [x] Fix serial no. in email
+* [ ] Donut loading
+* [ ] Submit on enter
 * [ ] Favicon
 
 
@@ -20,6 +22,6 @@
 
 * [ ] Remove Duplicate links
 * [ ] Let user choose frequency
-* [ ] Find XML file automatically
+* [x] Find XML file automatically
 * [ ] HTML email
 * [ ] Server side email validation
