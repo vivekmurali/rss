@@ -1,9 +1,10 @@
 # RSS FEED
 
 * [x] Style
-* [ ] Email validation
-* [ ] RSS validation
+* [x] Email validation
+* [x] RSS validation
 * [x] Fix serial no. in email
+* [ ] Favicon
 
 
 | ID     | EMAIL   | PASSWORD | CREATION DATE |
@@ -21,3 +22,4 @@
 * [ ] Let user choose frequency
 * [ ] Find XML file automatically
 * [ ] HTML email
+* [ ] Server side email validation

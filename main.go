@@ -11,12 +11,14 @@ import (
 	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/joho/godotenv"
 	"github.com/mailgun/mailgun-go/v4"
+	"github.com/mmcdole/gofeed"
 )
 
 type server struct {
-	db    *pgxpool.Pool
-	mg    *mailgun.MailgunImpl
-	store *sessions.CookieStore
+	db     *pgxpool.Pool
+	mg     *mailgun.MailgunImpl
+	store  *sessions.CookieStore
+	parser *gofeed.Parser
 }
 
 func main() {
@@ -25,6 +27,7 @@ func main() {
 	// Initialization
 	s := &server{mg: mailgun.NewMailgun("vivekmurali.in", os.Getenv("MG_API_KEY"))}
 	s.store = sessions.NewCookieStore([]byte(os.Getenv("SESSION_SECRET")))
+	s.parser = gofeed.NewParser()
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
 

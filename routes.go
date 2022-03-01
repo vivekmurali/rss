@@ -16,20 +16,6 @@ type UsersData struct {
 	Password string `json:"password"`
 }
 
-type Link struct {
-	Link  string `json:"link"`
-	Email string `json:"email"`
-}
-
-type Users struct {
-	Email string `json:"email"`
-}
-
-type LinkID struct {
-	LinkID int64  `json:"link"`
-	Email  string `json:"email"`
-}
-
 type LinkData struct {
 	Id   int64
 	Link string
@@ -43,18 +29,17 @@ func (s *server) addLink(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	link := r.FormValue("link")
-	fmt.Println(link)
+	// fmt.Println(link)
 
-	// var l Link
-	// err := json.NewDecoder(r.Body).Decode(&l)
-	// if err != nil {
-	// 	http.Error(w, err.Error(), http.StatusBadRequest)
-	// 	return
-	// }
+	_, err := s.parser.ParseURL(link)
+	if err != nil {
+		http.Error(w, "not a valid link", http.StatusBadRequest)
+		return
+	}
 
 	var user_id int64
 
-	err := s.db.QueryRow(context.Background(), "select id from users where email like $1", session.Values["email"]).Scan(&user_id)
+	err = s.db.QueryRow(context.Background(), "select id from users where email like $1", session.Values["email"]).Scan(&user_id)
 
 	tag, err := s.db.Exec(context.Background(), "insert into links (user_id, link)values($1, $2)", user_id, link)
 	if err != nil {
@@ -76,13 +61,6 @@ func (s *server) deleteLink(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Forbidden", http.StatusForbidden)
 		return
 	}
-
-	// var l LinkID
-	// err := json.NewDecoder(r.Body).Decode(&l)
-	// if err != nil {
-	// 	http.Error(w, err.Error(), http.StatusBadRequest)
-	// 	return
-	// }
 
 	linkID := chi.URLParam(r, "id")
 
@@ -112,12 +90,6 @@ func (s *server) getLinks(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/login", http.StatusTemporaryRedirect)
 		return
 	}
-	// var u Users
-	// err := json.NewDecoder(r.Body).Decode(&u)
-	// if err != nil {
-	// 	http.Error(w, err.Error(), http.StatusBadRequest)
-	// 	return
-	// }
 
 	var user_id int64
 
@@ -151,12 +123,6 @@ func (s *server) getLinks(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, rows.Err().Error(), http.StatusBadRequest)
 	}
 
-	// jsonData, err := json.Marshal(linksData)
-	// if err != nil {
-	// 	http.Error(w, err.Error(), http.StatusBadRequest)
-	// }
-
-	// w.Write(jsonData)
 	tmpl, _ := template.ParseFiles("template/dashboard.html")
 	tmpl.Execute(w, linksData)
 }

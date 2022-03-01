@@ -19,7 +19,7 @@
 				<div class="row">
 					<div class="col-sm-12 col-md-6">
 						<input
-							type="text"
+							type="email"
 							name="email"
 							id="email_id"
 							placeholder="email"
@@ -71,6 +71,10 @@
 		e.stopPropagation();
 	});
 	btn.addEventListener("click", () => {
+		let re = /\S+@\S+\.\S+/;
+		if (!re.test(document.getElementById("email_id").value)) {
+			return;
+		}
 		const data = {
 			email: document.getElementById("email_id").value,
 			password: document.getElementById("password_id").value,
@@ -88,7 +92,9 @@
 				if (response.ok) {
 					location.assign("/login");
 				}
-				document.getElementById("toast").style.visibility = "visible";
+				document.getElementById(
+					"toast"
+				).style.visibility = "visible";
 				return response.text();
 			})
 			.then((text) => {
