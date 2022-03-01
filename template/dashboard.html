@@ -7,23 +7,66 @@
 			content="width=device-width, initial-scale=1.0"
 		/>
 		<title>RSS</title>
+		<link
+			rel="stylesheet"
+			href="https://cdn.rawgit.com/Chalarangelo/mini.css/v3.0.1/dist/mini-default.min.css"
+		/>
 	</head>
 	<body>
 		<button id="logout-btn">Logout</button>
 		<form>
-			<input type="text" name="link" id="link" />
-			<input type="button" value="submit" id="submit-btn" />
+			<fieldset>
+				<legend>
+					Add an RSS Link
+					<span class="icon-rss"></span>
+				</legend>
+				<div class="row col-sm-12 col-md-6">
+					<input
+						placeholder="https://vivekmurali.in/index.xml"
+						type="text"
+						name="link"
+						id="link"
+					/>
+				</div>
+				<div class="row col-sm-12 col-md-6">
+					<input
+						class="primary"
+						type="button"
+						value="submit"
+						id="submit-btn"
+					/>
+				</div>
+			</fieldset>
 		</form>
-		<ul>
-			{{range .}}
-			<li>
-				{{.Link}}
-				<button class="delete-btn" data-id="{{.Id}}">
-					delete
-				</button>
-			</li>
-			{{end}}
-		</ul>
+		<br />
+
+		<h4>Your links</h4>
+		<table>
+			<caption>
+				Your links
+			</caption>
+			<thead>
+				<tr>
+					<th>Link</th>
+					<th>Delete</th>
+				</tr>
+			</thead>
+			<tbody>
+				{{range .}}
+				<tr>
+					<td data-label="Link">{{.Link}}</td>
+					<td data-label="Delete">
+						<button
+							class="delete-btn secondary"
+							data-id="{{.Id}}"
+						>
+							delete
+						</button>
+					</td>
+				</tr>
+				{{end}}
+			</tbody>
+		</table>
 	</body>
 </html>
 

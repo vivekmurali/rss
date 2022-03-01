@@ -7,23 +7,58 @@
 			content="width=device-width, initial-scale=1.0"
 		/>
 		<title>RSS</title>
+		<link
+			rel="stylesheet"
+			href="https://cdn.rawgit.com/Chalarangelo/mini.css/v3.0.1/dist/mini-default.min.css"
+		/>
 	</head>
 	<body>
 		<form action="/register" method="post" id="form">
-			<input
-				type="text"
-				name="email"
-				id="email_id"
-				placeholder="email"
-			/>
-			<input
-				type="text"
-				name="password"
-				id="password_id"
-				placeholder="password"
-			/>
-			<input type="button" value="submit" id="submit-btn" />
+			<fieldset>
+				<legend>Register</legend>
+				<div class="row">
+					<div class="col-sm-12 col-md-6">
+						<input
+							type="text"
+							name="email"
+							id="email_id"
+							placeholder="email"
+						/>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-sm-12 col-md-6">
+						<input
+							type="text"
+							name="password"
+							id="password_id"
+							placeholder="password"
+						/>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-sm-12 col-md-6">
+						<input
+							type="button"
+							value="submit"
+							id="submit-btn"
+							class="primary"
+						/>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-sm-12 col-md-6">
+						<a href="/login"
+							>If you already have an
+							account</a
+						>
+					</div>
+				</div>
+			</fieldset>
 		</form>
+		<span id="toast" class="toast" style="visibility: hidden"
+			>Email already in use</span
+		>
 	</body>
 </html>
 
@@ -40,8 +75,8 @@
 			email: document.getElementById("email_id").value,
 			password: document.getElementById("password_id").value,
 		};
-		console.log(data);
-		console.log(document.getElementById("email_id").value);
+		//console.log(data);
+		//console.log(document.getElementById("email_id").value);
 		fetch("/register", {
 			method: "POST",
 			headers: {
@@ -49,12 +84,21 @@
 			},
 			body: JSON.stringify(data),
 		})
-			.then((response) => response.text())
+			.then((response) => {
+				if (response.ok) {
+					location.assign("/login");
+				}
+				document.getElementById("toast").style.visibility = "visible";
+				return response.text();
+			})
 			.then((text) => {
-				console.log(text);
+				//console.log(text);
 			})
 			.catch((err) => {
-				console.error(error);
+				//console.error(error);
+				document.getElementById(
+					"toast"
+				).style.visibility = "visible";
 			});
 	});
 </script>

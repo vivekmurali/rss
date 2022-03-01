@@ -37,7 +37,9 @@ func main() {
 
 	// Routes
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("HELLO WORLD"))
+		// w.Write([]byte("HELLO WORLD"))
+		tmpl, _ := template.ParseFiles("template/index.html")
+		tmpl.Execute(w, nil)
 	})
 	r.Get("/register", func(w http.ResponseWriter, r *http.Request) {
 		tmpl, _ := template.ParseFiles("template/register.html")

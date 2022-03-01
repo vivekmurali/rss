@@ -121,10 +121,10 @@ func htmlTemplateGenerator(data []ItemData) string {
 	var emailString string
 
 	for i, v := range data {
-		if i >= 11 {
+		if i >= 10 {
 			break
 		}
-		emailString += strconv.Itoa(i)
+		emailString += strconv.Itoa(i + 1)
 		emailString += ". "
 		// emailString += "TITLE: "
 		emailString += v.title

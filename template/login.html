@@ -7,22 +7,56 @@
 			content="width=device-width, initial-scale=1.0"
 		/>
 		<title>RSS</title>
+		<link
+			rel="stylesheet"
+			href="https://cdn.rawgit.com/Chalarangelo/mini.css/v3.0.1/dist/mini-default.min.css"
+		/>
 	</head>
 	<body>
 		<form action="" method="" id="form">
-			<input
-				type="text"
-				name="email"
-				id="email_id"
-				placeholder="email"
-			/>
-			<input
-				type="text"
-				name="password"
-				id="password_id"
-				placeholder="password"
-			/>
-			<input type="button" value="submit" id="submit-btn" />
+			<fieldset>
+				<legend>Login</legend>
+				<div class="row">
+					<div class="col-sm-12 col-md-6">
+						<input
+							type="text"
+							name="email"
+							id="email_id"
+							placeholder="email"
+						/>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-sm-12 col-md-6">
+						<!-- <br /> -->
+						<input
+							type="text"
+							name="password"
+							id="password_id"
+							placeholder="password"
+						/>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-sm-12 col-md-6">
+						<!-- <br /> -->
+						<input
+							class="primary"
+							type="button"
+							value="submit"
+							id="submit-btn"
+						/>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-sm-12 col-md-6">
+						<a href="/register"
+							>If you don't have an
+							account</a
+						>
+					</div>
+				</div>
+			</fieldset>
 		</form>
 	</body>
 </html>
@@ -52,7 +86,7 @@
 			.then((response) => response.text())
 			.then((text) => {
 				//console.log(text);
-				location.replace('/dashboard');
+				location.replace("/dashboard");
 			})
 			.catch((err) => {
 				console.error(error);

@@ -1,10 +1,9 @@
 # RSS FEED
 
-* [x] Auth
-* [x] Modify RSS
-* [x] SMTP to send mail
-* [x] Email Template
-
+* [ ] Style
+* [ ] Email validation
+* [ ] RSS validation
+* [ ] Fix serial no. in email
 
 
 | ID     | EMAIL   | PASSWORD | CREATION DATE |
