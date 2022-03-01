@@ -1,12 +1,13 @@
 # RSS FEED
 
-* [ ] Style
+* [x] Style
 * [ ] Email validation
 * [ ] RSS validation
-* [ ] Fix serial no. in email
+* [x] Fix serial no. in email
 
 
 | ID     | EMAIL   | PASSWORD | CREATION DATE |
+|--------|---------|----------|---------------|
 | serial | varchar | varchar  | date          |
 
 
