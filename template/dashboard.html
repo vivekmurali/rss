@@ -23,9 +23,10 @@
 				<div class="row col-sm-12 col-md-6">
 					<input
 						placeholder="https://vivekmurali.in/index.xml"
-						type="text"
+						type="url"
 						name="link"
 						id="link"
+						autocomplete="off"
 					/>
 				</div>
 				<div class="row col-sm-12 col-md-6">
@@ -35,6 +36,19 @@
 						value="submit"
 						id="submit-btn"
 					/>
+					<div
+						id="donut"
+						class="spinner primary"
+						style="visibility: hidden"
+					></div>
+				</div>
+				<div class="row">
+					<p>
+						Note: You can enter the URL for
+						any website, if a valid feed for
+						the website is found, that link
+						will automatically be entered.
+					</p>
 				</div>
 			</fieldset>
 		</form>
@@ -67,7 +81,9 @@
 				{{end}}
 			</tbody>
 		</table>
-		<span class="toast" id="toast" style="visibility: hidden">Not a valid RSS link</span>
+		<span class="toast" id="toast" style="visibility: hidden"
+			>Not a valid RSS link</span
+		>
 	</body>
 </html>
 
@@ -79,23 +95,29 @@
 			}
 		});
 	});
-	form = document.getElementById("form")
+	form = document.getElementById("form");
 	form.addEventListener("submit", (e) => {
 		e.preventDefault();
 		e.stopPropagation();
 	});
 	document.getElementById("submit-btn").addEventListener("click", () => {
 		let formData = new FormData();
+		document.getElementById("donut").style.visibility = "visible";
 		formData.append("link", document.getElementById("link").value);
 		fetch("/add", {
 			method: "POST",
 			body: formData,
 		})
 			.then((res) => {
+				document.getElementById(
+					"donut"
+				).style.visibility = "hidden";
 				if (res.ok) {
 					location.reload();
 				} else {
-					document.getElementById("toast").style.visibility = "visible"
+					document.getElementById(
+						"toast"
+					).style.visibility = "visible";
 					return res.text();
 				}
 			})

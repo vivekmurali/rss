@@ -4,9 +4,10 @@
 * [x] Email validation
 * [x] RSS validation
 * [x] Fix serial no. in email
-* [ ] Donut loading
+* [x] Donut loading
 * [ ] Submit on enter
 * [ ] Favicon
+* [x] Prevent autofill
 
 
 | ID     | EMAIL   | PASSWORD | CREATION DATE |
@@ -25,3 +26,5 @@
 * [x] Find XML file automatically
 * [ ] HTML email
 * [ ] Server side email validation
+* [ ] Change password
+* [ ] Account Verification

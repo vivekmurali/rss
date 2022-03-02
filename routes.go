@@ -29,20 +29,12 @@ func (s *server) addLink(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Forbidden", http.StatusForbidden)
 		return
 	}
+	var flag bool = true
 	link := r.FormValue("link")
-	// fmt.Println(link)
-
-	// _, err := url.Parse(link)
-	// if err != nil {
-	// 	http.Error(w, "not a valid link", http.StatusBadRequest)
-	// 	return
-	// }
-	// host := u.Host
-
-	// tries := []string{"feed", "index.xml", "rss"}
 
 	_, err := s.parser.ParseURL(link)
 	if err != nil {
+		flag = false
 		resp, err := http.Get(link)
 		if err != nil {
 			http.Error(w, "not a valid link", http.StatusBadRequest)
@@ -61,34 +53,15 @@ func (s *server) addLink(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 			if t == "application/rss+xml" || t == "application/atom+xml" {
-				// fmt.Println(s.Attr("href"))
+				flag = true
 				link, _ = s.Attr("href")
 			}
 		})
-		// }
 
-		// resp, err := http.Get(link)
-		// if err != nil {
-		// 	http.Error(w, "not a valid link", http.StatusBadRequest)
-		// 	return
-		// }
-		// defer resp.Body.Close()
-
-		// doc, err := goquery.NewDocumentFromReader(resp.Body)
-		// if err != nil {
-		// 	fmt.Println(err.Error())
-		// }
-
-		// doc.Find("link").Each(func(i int, s *goquery.Selection) {
-		// 	t, ok := s.Attr("type")
-		// 	if !ok {
-		// 		return
-		// 	}
-		// 	if t == "application/rss+xml" || t == "application/atom+xml" {
-		// 		// fmt.Println(s.Attr("href"))
-		// 		link, _ = s.Attr("href")
-		// 	}
-		// })
+		if !flag {
+			http.Error(w, "not a valid link", http.StatusBadRequest)
+			return
+		}
 
 		var user_id int64
 
